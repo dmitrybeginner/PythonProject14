@@ -135,6 +135,6 @@ jobs:
             git reset --hard origin/develop
             docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} -p ${{ secrets.DOCKER_HUB_TOKEN }}
             
-            # The DOCKER_IMAGE var is now read from the .env file by docker-compose
-            docker compose pull
-            docker compose up -d --remove-orphans
+            # Explicitly use the .env file for variable substitution
+            docker compose --env-file .env pull
+            docker compose --env-file .env up -d --remove-orphans
