@@ -60,10 +60,10 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd ${{ secrets.DEPLOY_PATH }} && \
-            echo "DOCKER_IMAGE=${{ secrets.DOCKER_HUB_USERNAME }}/habits-tracker:${{ github.sha }}" > .env && \
-            echo "${{ secrets.ENV_FILE_CONTENT }}" >> .env && \
+            echo "${{ secrets.ENV_FILE_CONTENT }}" > .env && \
             git fetch origin && \
             git reset --hard origin/develop && \
             docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} -p ${{ secrets.DOCKER_HUB_TOKEN }} && \
-            docker-compose pull && \
-            docker-compose up -d --no-build
+            export DOCKER_IMAGE=${{ secrets.DOCKER_HUB_USERNAME }}/habits-tracker:${{ github.sha }} && \
+            docker pull $DOCKER_IMAGE && \
+            DOCKER_IMAGE=$DOCKER_IMAGE docker-compose up -d --no-build
