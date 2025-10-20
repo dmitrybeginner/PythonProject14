@@ -27,9 +27,43 @@ jobs:
         run: |
           flake8 . --max-line-length=120 --exclude=migrations,venv,__pycache__
 
-  build_and_push:
+  test:
     runs-on: ubuntu-latest
     needs: lint
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.10'
+
+      - name: Install Poetry
+        run: |
+          pip install poetry
+
+      - name: Install dependencies
+        run: |
+          poetry install
+
+      - name: Run tests
+        env:
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
+          DEBUG: ${{ secrets.DEBUG }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}
+          POSTGRES_PORT: ${{ secrets.POSTGRES_PORT }}
+          CORS_ALLOWED_HOSTS: ${{ secrets.CORS_ALLOWED_HOSTS }}
+        run: |
+          poetry run python manage.py test
+
+  build_and_push:
+    runs-on: ubuntu-latest
+    needs: test
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -62,6 +96,7 @@ jobs:
             set -e
             cd ${{ secrets.DEPLOY_PATH }}
             echo "${{ secrets.ENV_FILE_CONTENT }}" > .env
+            echo "DOCKER_IMAGE=${{ secrets.DOCKER_HUB_USERNAME }}/habits-tracker:${{ github.sha }}" >> .env
             
             COMPOSE_VERSION="v2.24.1"
             DOCKER_CLI_PLUGINS_DIR="$HOME/.docker/cli-plugins"
@@ -79,7 +114,6 @@ jobs:
             git reset --hard origin/develop
             docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} -p ${{ secrets.DOCKER_HUB_TOKEN }}
             
-            export DOCKER_IMAGE=${{ secrets.DOCKER_HUB_USERNAME }}/habits-tracker:${{ github.sha }}
-            docker pull $DOCKER_IMAGE
-            
-            DOCKER_IMAGE=$DOCKER_IMAGE docker compose up -d --remove-orphans
+            # The DOCKER_IMAGE var is now read from the .env file by docker-compose
+            docker compose pull
+            docker compose up -d --remove-orphans
