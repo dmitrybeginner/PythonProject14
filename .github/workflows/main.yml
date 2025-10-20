@@ -74,9 +74,9 @@ jobs:
           SECRET_KEY: ${{ secrets.SECRET_KEY }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           DEBUG: True
-          DB_NAME: testdb
-          DB_USER: testuser
-          DB_PASSWORD: testpassword
+          POSTGRES_DB: testdb
+          POSTGRES_USER: testuser
+          POSTGRES_PASSWORD: testpassword
           DB_HOST: localhost
           DB_PORT: 5432
           REDIS_URL: redis://localhost:6379/0
