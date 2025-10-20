@@ -1,42 +1,61 @@
-version: '3.8'
+version: '3.9'
 
 services:
   db:
-    image: postgres:15
-    environment:
-      POSTGRES_DB: habits_db
-      POSTGRES_USER: habits_user
-      POSTGRES_PASSWORD: habits_password
+    image: postgres:13
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
+      - postgres_data:/var/lib/postgresql/data/
+    env_file:
+      - ./.env
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   redis:
-    image: redis:7-alpine
-    ports:
-      - "6379:6379"
+    image: redis:alpine
 
   web:
     build: .
-    command: python manage.py runserver 0.0.0.0:8000
+    command: gunicorn config.wsgi:application --bind 0.0.0.0:8000
     volumes:
-      - .:/code
-    ports:
-      - "8000:8000"
+      - static_volume:/app/static
+    env_file:
+      - ./.env
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  celery:
+    build: .
+    command: celery -A config worker -l INFO
+    env_file:
+      - ./.env
+    depends_on:
       - redis
-    environment:
-      - SECRET_KEY=django-insecure-dev-key
-      - DEBUG=True
-      - DB_NAME=habits_db
-      - DB_USER=habits_user
-      - DB_PASSWORD=habits_password
-      - DB_HOST=db
-      - DB_PORT=5432
-      - REDIS_URL=redis://redis:6379
-      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - db
+
+  celery-beat:
+    build: .
+    command: celery -A config beat -l INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    env_file:
+      - ./.env
+    depends_on:
+      - redis
+      - db
+
+  nginx:
+    build: ./nginx
+    ports:
+      - "80:80"
+    volumes:
+      - static_volume:/app/static
+    depends_on:
+      - web
 
 volumes:
   postgres_data:
+  static_volume:

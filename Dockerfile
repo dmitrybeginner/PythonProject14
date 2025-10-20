@@ -1,30 +1,32 @@
+# 1. Базовый образ
 FROM python:3.10-slim
 
-WORKDIR /code
+# 2. Установка переменных окружения
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
 
-# Установка системных зависимостей
-RUN apt-get update && apt-get install -y \
-    gcc \
-    && rm -rf /var/lib/apt/lists/*
+# 3. Установка рабочей директории
+WORKDIR /app
 
-# Копирование файлов зависимостей
-COPY pyproject.toml poetry.lock ./
-
-# Установка Poetry
+# 4. Установка Poetry
 RUN pip install poetry
 
-# Установка зависимостей
-RUN poetry config virtualenvs.create false \
-    && poetry install --no-interaction --no-ansi
+# 5. Копирование файлов зависимостей и их установка
+COPY poetry.lock pyproject.toml /app/
+RUN poetry config virtualenvs.create false && poetry install --no-dev --no-interaction --no-ansi
 
-# Копирование кода проекта
-COPY . .
+# 6. Копирование кода проекта
+COPY . /app/
 
-# Создание пользователя
-RUN adduser --disabled-password --gecos '' django \
-    && chown -R django:django /code
-USER django
+# 7. Копирование и установка прав для entrypoint
+COPY entrypoint.sh /app/
+RUN chmod +x /app/entrypoint.sh
 
+# 8. Открытие порта
 EXPOSE 8000
 
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+# 9. Установка entrypoint
+ENTRYPOINT ["/app/entrypoint.sh"]
+
+# 10. Команда для запуска (будет передана в entrypoint)
+CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000"]

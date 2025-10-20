@@ -23,6 +23,7 @@ drf-yasg = "^1.21.7"
 django-celery-beat = "^2.7.0"
 requests = "^2.32.5"
 psycopg2-binary = "^2.9.9"
+gunicorn = "^22.0.0"
 
 [tool.poetry.group.dev.dependencies]
 
