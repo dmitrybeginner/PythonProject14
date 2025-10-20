@@ -62,9 +62,12 @@ jobs:
             set -e
             cd ${{ secrets.DEPLOY_PATH }}
 
-            echo "--- Printing secrets.ENV_FILE_CONTENT for debugging ---"
-            echo "${{ secrets.ENV_FILE_CONTENT }}"
-            echo "--- End of ENV_FILE_CONTENT ---"
+            echo "--- Cleaning up Docker environment on server ---"
+            # Stop and remove containers, and remove the volumes attached to them.
+            docker compose down --volumes || true
+            # Aggressively prune all unused docker objects to ensure a clean slate.
+            docker system prune -a -f --volumes
+            echo "--- Docker cleanup complete ---"
 
             echo "${{ secrets.ENV_FILE_CONTENT }}" > .env
             
@@ -87,9 +90,4 @@ jobs:
             export DOCKER_IMAGE=${{ secrets.DOCKER_HUB_USERNAME }}/habits-tracker:${{ github.sha }}
             docker pull $DOCKER_IMAGE
             
-            # Run docker-compose. If it fails, print logs and exit.
-            if ! DOCKER_IMAGE=$DOCKER_IMAGE docker compose up -d --remove-orphans; then
-              echo "--- docker-compose up failed, printing db logs... ---"
-              docker compose logs db
-              exit 1
-            fi
+            DOCKER_IMAGE=$DOCKER_IMAGE docker compose up -d --remove-orphans
