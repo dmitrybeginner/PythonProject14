@@ -1,0 +1,15 @@
+# Secrets
+.env
+
+# Django
+db.sqlite3
+
+# Python
+__pycache__/
+*.pyc
+
+# IDE
+.idea/
+
+# Docker
+docker-compose.override.yml
