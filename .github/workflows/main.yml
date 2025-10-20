@@ -61,14 +61,6 @@ jobs:
           script: |
             set -e
             cd ${{ secrets.DEPLOY_PATH }}
-
-            echo "--- Cleaning up Docker environment on server ---"
-            # Stop and remove containers, and remove the volumes attached to them.
-            docker compose down --volumes || true
-            # Aggressively prune all unused docker objects to ensure a clean slate.
-            docker system prune -a -f --volumes
-            echo "--- Docker cleanup complete ---"
-
             echo "${{ secrets.ENV_FILE_CONTENT }}" > .env
             
             COMPOSE_VERSION="v2.24.1"
