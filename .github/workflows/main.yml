@@ -82,4 +82,9 @@ jobs:
             export DOCKER_IMAGE=${{ secrets.DOCKER_HUB_USERNAME }}/habits-tracker:${{ github.sha }}
             docker pull $DOCKER_IMAGE
             
-            DOCKER_IMAGE=$DOCKER_IMAGE docker compose up -d --remove-orphans
+            # Run docker-compose. If it fails, print logs and exit.
+            if ! DOCKER_IMAGE=$DOCKER_IMAGE docker compose up -d --remove-orphans; then
+              echo "--- docker-compose up failed, printing db logs... ---"
+              docker compose logs db
+              exit 1
+            fi
