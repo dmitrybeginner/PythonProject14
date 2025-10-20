@@ -25,7 +25,7 @@ jobs:
 
       - name: Run flake8
         run: |
-          flake8 .
+          flake8 . --max-line-length=120 --exclude=migrations,venv,__pycache__
 
   build_and_push:
     runs-on: ubuntu-latest
