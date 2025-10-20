@@ -117,7 +117,6 @@ jobs:
             set -e
             cd ${{ secrets.DEPLOY_PATH }}
             echo "${{ secrets.ENV_FILE_CONTENT }}" > .env
-            echo "DOCKER_IMAGE=${{ secrets.DOCKER_HUB_USERNAME }}/habits-tracker:${{ github.sha }}" >> .env
             
             COMPOSE_VERSION="v2.24.1"
             DOCKER_CLI_PLUGINS_DIR="$HOME/.docker/cli-plugins"
@@ -135,6 +134,7 @@ jobs:
             git reset --hard origin/develop
             docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} -p ${{ secrets.DOCKER_HUB_TOKEN }}
             
-            # Explicitly use the .env file for variable substitution
-            docker compose --env-file .env pull
-            docker compose --env-file .env up -d --remove-orphans
+            export DOCKER_IMAGE=${{ secrets.DOCKER_HUB_USERNAME }}/habits-tracker:${{ github.sha }}
+            docker pull $DOCKER_IMAGE
+            
+            DOCKER_IMAGE=$DOCKER_IMAGE docker compose up -d --remove-orphans
