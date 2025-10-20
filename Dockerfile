@@ -13,7 +13,7 @@ RUN pip install poetry
 
 # 5. Копирование файлов зависимостей и их установка
 COPY poetry.lock pyproject.toml /app/
-RUN poetry config virtualenvs.create false && poetry install --no-dev --no-interaction --no-ansi
+RUN poetry config virtualenvs.create false && poetry install --only main --no-interaction --no-ansi
 
 # 6. Копирование кода проекта
 COPY . /app/
