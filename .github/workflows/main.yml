@@ -32,7 +32,7 @@ jobs:
     needs: lint
     services:
       postgres:
-        image: postgres:13
+        image: postgres:16
         env:
           POSTGRES_USER: testuser
           POSTGRES_PASSWORD: testpassword
