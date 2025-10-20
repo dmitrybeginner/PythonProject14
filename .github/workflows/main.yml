@@ -60,13 +60,11 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd ${{ secrets.DEPLOY_PATH }} && \
-            echo "--- Current directory: ---" && \
-            pwd && \
-            echo "--- Files in directory: ---" && \
-            ls -la && \
-            echo "--- Starting deployment --- " && \
             echo "${{ secrets.ENV_FILE_CONTENT }}" > .env && \
-            git pull && \
+            git fetch origin && \
+            git reset --hard origin/develop && \
+            echo "--- Files after git reset: ---" && \
+            ls -la && \
             docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} -p ${{ secrets.DOCKER_HUB_TOKEN }} && \
             docker-compose pull && \
             docker-compose up -d --no-build
