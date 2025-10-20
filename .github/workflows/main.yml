@@ -66,4 +66,4 @@ jobs:
             docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} -p ${{ secrets.DOCKER_HUB_TOKEN }} && \
             export DOCKER_IMAGE=${{ secrets.DOCKER_HUB_USERNAME }}/habits-tracker:${{ github.sha }} && \
             docker pull $DOCKER_IMAGE && \
-            DOCKER_IMAGE=$DOCKER_IMAGE docker-compose up -d
+            DOCKER_IMAGE=$DOCKER_IMAGE docker compose up -d
