@@ -63,9 +63,6 @@ jobs:
             echo "${{ secrets.ENV_FILE_CONTENT }}" > .env && \
             git fetch origin && \
             git reset --hard origin/develop && \
-            echo "--- Verifying docker-compose.yml content: ---" && \
-            cat docker-compose.yml && \
-            echo "--- End of docker-compose.yml ---" && \
             docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} -p ${{ secrets.DOCKER_HUB_TOKEN }} && \
             export DOCKER_IMAGE=${{ secrets.DOCKER_HUB_USERNAME }}/habits-tracker:${{ github.sha }} && \
             docker pull $DOCKER_IMAGE && \
