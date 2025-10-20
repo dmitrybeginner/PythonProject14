@@ -137,4 +137,4 @@ jobs:
             export DOCKER_IMAGE=${{ secrets.DOCKER_HUB_USERNAME }}/habits-tracker:${{ github.sha }}
             docker pull $DOCKER_IMAGE
             
-            DOCKER_IMAGE=$DOCKER_IMAGE docker compose up -d --remove-orphans
+            DOCKER_IMAGE=$DOCKER_IMAGE docker compose up -d --build --remove-orphans
