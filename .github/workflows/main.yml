@@ -59,11 +59,27 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            cd ${{ secrets.DEPLOY_PATH }} && \
-            echo "${{ secrets.ENV_FILE_CONTENT }}" > .env && \
-            git fetch origin && \
-            git reset --hard origin/develop && \
-            docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} -p ${{ secrets.DOCKER_HUB_TOKEN }} && \
-            export DOCKER_IMAGE=${{ secrets.DOCKER_HUB_USERNAME }}/habits-tracker:${{ github.sha }} && \
-            docker pull $DOCKER_IMAGE && \
-            DOCKER_IMAGE=$DOCKER_IMAGE docker compose up -d
+            set -e
+            cd ${{ secrets.DEPLOY_PATH }}
+            echo "${{ secrets.ENV_FILE_CONTENT }}" > .env
+            
+            COMPOSE_VERSION="v2.24.1"
+            DOCKER_CLI_PLUGINS_DIR="$HOME/.docker/cli-plugins"
+            mkdir -p "$DOCKER_CLI_PLUGINS_DIR"
+            COMPOSE_DESTINATION="$DOCKER_CLI_PLUGINS_DIR/docker-compose"
+            
+            # Download and install docker-compose if not present or version mismatch
+            if ! [ -x "$COMPOSE_DESTINATION" ] || ! ( "$COMPOSE_DESTINATION" version 2>/dev/null | grep -q "$COMPOSE_VERSION" ); then
+              echo "Downloading docker-compose version ${COMPOSE_VERSION}"
+              curl -SL "https://github.com/docker/compose/releases/download/${COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m)" -o "$COMPOSE_DESTINATION"
+              chmod +x "$COMPOSE_DESTINATION"
+            fi
+
+            git fetch origin
+            git reset --hard origin/develop
+            docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} -p ${{ secrets.DOCKER_HUB_TOKEN }}
+            
+            export DOCKER_IMAGE=${{ secrets.DOCKER_HUB_USERNAME }}/habits-tracker:${{ github.sha }}
+            docker pull $DOCKER_IMAGE
+            
+            DOCKER_IMAGE=$DOCKER_IMAGE docker compose up -d --remove-orphans
