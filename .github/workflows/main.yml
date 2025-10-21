@@ -117,6 +117,23 @@ jobs:
             set -e
             cd ${{ secrets.DEPLOY_PATH }}
             echo "${{ secrets.ENV_FILE_CONTENT }}" > .env
+
+            # Safely check for the presence of required environment variables
+            echo "--- Checking for required variables in .env file ---"
+            if ! grep -q "^POSTGRES_DB=" .env; then
+                echo "ERROR: POSTGRES_DB is not set in the .env file."
+                exit 1
+            fi
+            if ! grep -q "^POSTGRES_USER=" .env; then
+                echo "ERROR: POSTGRES_USER is not set in the .env file."
+                exit 1
+            fi
+            if ! grep -q "^POSTGRES_PASSWORD=" .env; then
+                echo "ERROR: POSTGRES_PASSWORD is not set in the .env file."
+                exit 1
+            fi
+            echo "--- All required database variables are present. ---"
+
             git fetch origin
             git reset --hard origin/develop
             docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} -p ${{ secrets.DOCKER_HUB_TOKEN }}
