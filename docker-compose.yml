@@ -2,7 +2,7 @@ version: '3.9'
 
 services:
   db:
-    image: postgres:16
+    image: postgres:15
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     env_file:
@@ -17,9 +17,10 @@ services:
     image: redis:alpine
 
   web:
-    image: ${DOCKER_IMAGE}
+    build: .
     command: gunicorn config.wsgi:application --bind 0.0.0.0:8000
     volumes:
+      - .:/app
       - static_volume:/app/static_prod
     env_file:
       - ./.env
@@ -35,8 +36,10 @@ services:
       retries: 5
 
   celery:
-    image: ${DOCKER_IMAGE}
+    build: .
     command: celery -A config worker -l INFO
+    volumes:
+      - .:/app
     env_file:
       - ./.env
     depends_on:
@@ -44,8 +47,10 @@ services:
       - db
 
   celery-beat:
-    image: ${DOCKER_IMAGE}
+    build: .
     command: celery -A config beat -l INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    volumes:
+      - .:/app
     env_file:
       - ./.env
     depends_on:

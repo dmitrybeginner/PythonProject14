@@ -1,0 +1,15 @@
+version: '3.9'
+
+services:
+  web:
+    image: ${DOCKER_IMAGE}
+    volumes:
+      - static_volume:/app/static_prod
+
+  celery:
+    image: ${DOCKER_IMAGE}
+    volumes: []
+
+  celery-beat:
+    image: ${DOCKER_IMAGE}
+    volumes: []
