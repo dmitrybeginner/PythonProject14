@@ -52,6 +52,16 @@ services:
       - redis
       - db
 
+  telegram-bot:
+    image: ${DOCKER_IMAGE:-dmitrybeginner/habits-tracker:latest}
+    command: python manage.py run_telegram_bot
+    restart: always
+    env_file:
+      - ./.env
+    depends_on:
+      db:
+        condition: service_healthy
+
   nginx:
     build: ./nginx
     ports:
