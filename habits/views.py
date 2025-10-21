@@ -12,12 +12,10 @@ class HabitListCreateView(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated]
     pagination_class = HabitPagination
 
-    @swagger_auto_schema(
-        operation_description="Получить список привычек текущего пользователя",
-        operation_summary="Список привычек пользователя"
-    )
     def get_queryset(self):
-        return Habit.objects.filter(user=self.request.user)
+        if self.request.user.is_authenticated:
+            return Habit.objects.filter(user=self.request.user)
+        return Habit.objects.none()
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
@@ -32,7 +30,9 @@ class HabitDetailView(generics.RetrieveUpdateDestroyAPIView):
         operation_summary="Детали привычки"
     )
     def get_queryset(self):
-        return Habit.objects.filter(user=self.request.user)
+        if self.request.user.is_authenticated:
+            return Habit.objects.filter(user=self.request.user)
+        return Habit.objects.none()
 
 
 class PublicHabitListView(generics.ListAPIView):
