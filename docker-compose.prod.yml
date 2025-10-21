@@ -13,3 +13,7 @@ services:
   celery-beat:
     image: ${DOCKER_IMAGE}
     volumes: []
+
+  telegram-bot:
+    image: ${DOCKER_IMAGE}
+    volumes: []
