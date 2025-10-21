@@ -8,6 +8,9 @@ ENV PYTHONUNBUFFERED 1
 # 3. Установка рабочей директории
 WORKDIR /app
 
+# 3.1 Установка curl для healthcheck
+RUN apt-get update && apt-get install -y curl
+
 # 4. Установка Poetry
 RUN pip install poetry
 
