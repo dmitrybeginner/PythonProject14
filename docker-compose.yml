@@ -52,7 +52,8 @@ services:
     ports:
       - "80:80"
     volumes:
-      - static_volume:/app/static
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/nginx.conf
+      - static_volume:/app/static_prod
     depends_on:
       - web
 
