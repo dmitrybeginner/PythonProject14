@@ -20,7 +20,7 @@ services:
     image: ${DOCKER_IMAGE}
     command: gunicorn config.wsgi:application --bind 0.0.0.0:8000
     volumes:
-      - static_volume:/app/static
+      - static_volume:/app/static_prod
     env_file:
       - ./.env
     depends_on:
